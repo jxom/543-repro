@@ -1,26 +1,32 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { createPublicClient, http, getContract } from 'viem'
+import { mainnet } from 'viem/chains'
 
-function App() {
+import { wagmiContract } from './contract'
+
+const publicClient = createPublicClient({
+  chain: mainnet,
+  transport: http()
+})
+
+const contract = getContract({
+  ...wagmiContract,
+  publicClient
+})
+
+export default function App() {
+  const [totalSupply, setTotalSupply] = useState<bigint | undefined>()
+
+  useEffect(() => {
+    (async () => {
+      const totalSupply = await contract.read.totalSupply()
+      setTotalSupply(totalSupply)
+    })()
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      Total supply: {totalSupply?.toString()}
     </div>
   );
 }
-
-export default App;
